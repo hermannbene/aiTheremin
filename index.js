@@ -1,3 +1,3 @@
-import { greet } from './my_wasm_project.js';
+import { greet } from './webapp.js';
 
 alert(greet('World'));
