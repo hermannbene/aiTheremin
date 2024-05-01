@@ -1,39 +1,57 @@
-// Import the necessary functions from camera.js and handDetection.js
-import { startCamera, stopCamera, toggleCamera } from './camera.js';
-import { runHandDetection } from './handDetection.js';
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const context = canvas.getContext('2d');
 
-document.addEventListener('DOMContentLoaded', () => {
-    const video = document.getElementById('video');
+// Load the handpose model
+async function loadModel() {
+    return await handpose.load();
+}
 
-    // Handle any errors in camera setup or hand detection
-    async function setupCameraAndDetection() {
-        try {
-            // Start the camera and then start hand detection
-            await startCamera(video);
-            runHandDetection(video);
-        } catch (error) {
-            console.error('Failed to set up the camera or hand detection:', error);
+// Detect hands in the video frame
+async function detectHands(video, model) {
+    const predictions = await model.estimateHands(video);
+    if (predictions.length > 0) {
+        console.log(predictions);  // Log hand predictions to the console
+
+        // Draw hand keypoints
+        for (let i = 0; i < predictions.length; i++) {
+            const keypoints = predictions[i].landmarks;
+            drawKeypoints(keypoints);
         }
     }
+}
 
-    setupCameraAndDetection();
+// Draw keypoints on the canvas
+function drawKeypoints(keypoints) {
+    keypoints.forEach(point => {
+        const [x, y] = point;
+        context.beginPath();
+        context.arc(x, y, 5, 0, 2 * Math.PI);
+        context.fillStyle = 'red';
+        context.fill();
+    });
+}
 
-    // Optional: Setup event listeners for UI elements like buttons to stop or toggle the camera
-    // Example button for stopping the camera
-    const stopButton = document.getElementById('stopButton');
-    if (stopButton) {
-        stopButton.addEventListener('click', () => {
-            stopCamera(video);
-        });
-    }
+// Setup the camera
+async function setupCamera() {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
 
-    // Example button for toggling the camera
-    const toggleButton = document.getElementById('toggleButton');
-    if (toggleButton) {
-        toggleButton.addEventListener('click', () => {
-            // Assume `useRearCamera` is a boolean that tracks the current state
-            useRearCamera = !useRearCamera;  // This variable should be defined in your broader scope
-            toggleCamera(video, useRearCamera);
-        });
-    }
-});
+    return new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+            resolve(video);
+        };
+    });
+}
+
+// Start video processing and hand tracking
+async function main() {
+    const video = await setupCamera();
+    video.play();
+    const model = await loadModel();
+    setInterval(() => {
+        detectHands(video, model);
+    }, 100);
+}
+
+main();

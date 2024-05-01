@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Camera Access</title>
+    <title>Hand Tracking Web App</title>
 </head>
 <body>
-    <h1>Camera Stream Example</h1>
-    <video id="video" autoplay playsinline></video>
-    <div>
-        <button onclick="startCamera()">Start Camera</button>
-        <button onclick="stopCamera()">Stop Camera</button>
-        <button onclick="toggleCamera()">Toggle Camera</button>
-    </div>
-
-    <script src="wasm-hand-detection/camera.js"></script>
+    <h1>Real-Time Hand Tracking</h1>
+    <video id="video" autoplay playsinline width="640" height="480"></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
+    <script src="app.js"></script>
 </body>
 </html>
