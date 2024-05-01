@@ -19,6 +19,38 @@ oscillator.connect(gainNode);
 gainNode.connect(audioContext.destination);
 oscillator.start();
 
+function initializeAudio() {
+    oscillator = audioContext.createOscillator();
+    gainNode = audioContext.createGain();
+
+    oscillator.type = 'sine';
+    oscillator.frequency.value = 440;
+    gainNode.gain.value = 0;
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    oscillator.start();
+}
+
+function toggleAudio() {
+    if (!oscillator || !gainNode) {
+        initializeAudio(); // Initialize on first interaction
+    }
+
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+
+    if (isAudioPlaying) {
+        gainNode.gain.value = 0;
+        isAudioPlaying = false;
+    } else {
+        isAudioPlaying = true;
+        gainNode.gain.value = 1; // Adjust according to your application needs
+    }
+}
+
+
 async function setupCamera() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -110,15 +142,6 @@ async function detectHands(model) {
     }
 
     frameAnalysis();
-}
-
-function toggleAudio() {
-    if (isAudioPlaying) {
-        gainNode.gain.value = 0;
-        isAudioPlaying = false;
-    } else {
-        isAudioPlaying = true;
-    }
 }
 
 async function main() {
