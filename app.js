@@ -1,21 +1,73 @@
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
+const frequencyDisplay = document.getElementById('frequencyDisplay');
+const volumeDisplay = document.getElementById('volumeDisplay');
+const permissionNotice = document.getElementById('permissionNotice');
+
+// Web Audio API setup
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+let oscillator = audioContext.createOscillator();
+let gainNode = audioContext.createGain();
+let isAudioPlaying = true; // To keep track of audio state
+
+oscillator.type = 'sine'; // Type of wave
+oscillator.frequency.value = 440; // Starting frequency
+gainNode.gain.value = 0; // Start with the volume at 0
+
+oscillator.connect(gainNode);
+gainNode.connect(audioContext.destination);
+oscillator.start();
 
 async function setupCamera() {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        permissionNotice.style.display = 'none'; // Hide permission notice on success
 
-    return new Promise((resolve) => {
-        video.onloadedmetadata = () => {
-            resolve(video);
-        };
-    });
+        return new Promise((resolve) => {
+            video.onloadedmetadata = () => {
+                resolve(video);
+            };
+        });
+    } catch (error) {
+        console.error('Camera access denied:', error);
+        permissionNotice.innerText = 'Camera access denied. Please enable it to use this app.';
+        permissionNotice.style.display = 'block'; // Show permission notice on failure
+    }
 }
 
 async function loadModel() {
-    const model = await handpose.load();
-    return model;
+    return await handpose.load();
+}
+
+function calculateDistance(point1, point2) {
+    const xDiff = point1[0] - point2[0];
+    const yDiff = point1[1] - point2[1];
+    return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+}
+
+function drawHand(landmarks) {
+    context.save();
+    context.translate(canvas.width, 0);
+    context.scale(-1, 1); // Flip the canvas to match the flipped video
+
+    for (let i = 0; i < landmarks.length; i++) {
+        const x = landmarks[i][0];
+        const y = landmarks[i][1];
+        context.beginPath();
+        context.arc(x, y, 5, 0, 2 * Math.PI);
+        context.fillStyle = 'red';
+        context.fill();
+    }
+
+    context.restore();
+}
+
+function displayDistance(distance) {
+    context.fillStyle = 'white';
+    context.font = '16px Arial';
+    context.fillText(`Distance: ${distance.toFixed(2)}px`, 10, 50);
 }
 
 async function detectHands(model) {
@@ -29,6 +81,28 @@ async function detectHands(model) {
             predictions.forEach(prediction => {
                 const landmarks = prediction.landmarks;
                 drawHand(landmarks);
+
+                if (landmarks.length > 8) {
+                    const thumbTip = landmarks[4];
+                    const indexTip = landmarks[8];
+                    const distance = calculateDistance(thumbTip, indexTip);
+
+                    const maxVolume = 1;
+                    const maxDistance = 200;
+                    gainNode.gain.value = Math.min(distance / maxDistance, 1) * maxVolume;
+
+                    const handY = prediction.boundingBox.topLeft[1] + (prediction.boundingBox.bottomRight[1] - prediction.boundingBox.topLeft[1]) / 2;
+                    const maxFrequency = 1000;
+                    const minFrequency = 100;
+                    const videoHeight = video.height;
+                    oscillator.frequency.value = ((videoHeight - handY) / videoHeight) * (maxFrequency - minFrequency) + minFrequency;
+
+                    // Update UI
+                    frequencyDisplay.textContent = oscillator.frequency.value.toFixed(2);
+                    volumeDisplay.textContent = (gainNode.gain.value * 100).toFixed(2);
+
+                    displayDistance(distance);
+                }
             });
         }
 
@@ -38,14 +112,12 @@ async function detectHands(model) {
     frameAnalysis();
 }
 
-function drawHand(landmarks) {
-    for (let i = 0; i < landmarks.length; i++) {
-        const x = landmarks[i][0];
-        const y = landmarks[i][1];
-        context.beginPath();
-        context.arc(x, y, 5, 0, 2 * Math.PI);
-        context.fillStyle = 'red';
-        context.fill();
+function toggleAudio() {
+    if (isAudioPlaying) {
+        gainNode.gain.value = 0;
+        isAudioPlaying = false;
+    } else {
+        isAudioPlaying = true;
     }
 }
 
