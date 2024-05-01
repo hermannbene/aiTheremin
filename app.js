@@ -9,53 +9,28 @@ const permissionNotice = document.getElementById('permissionNotice');
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 let oscillator = audioContext.createOscillator();
 let gainNode = audioContext.createGain();
-let isAudioPlaying = true; // To keep track of audio state
 
-oscillator.type = 'sine'; // Type of wave
-oscillator.frequency.value = 440; // Starting frequency
-gainNode.gain.value = 0.5; // Start with the volume at 0
+oscillator.type = 'sine';
+oscillator.frequency.value = 440;  // Initial frequency in hertz
+gainNode.gain.value = 0;  // Start with mute to prevent autoplay issues
 
 oscillator.connect(gainNode);
 gainNode.connect(audioContext.destination);
-oscillator.start();
 
-function initializeAudio() {
-    oscillator = audioContext.createOscillator();
-    gainNode = audioContext.createGain();
-
-    oscillator.type = 'sine';
-    oscillator.frequency.value = 440;
-    gainNode.gain.value = 0;
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    oscillator.start();
-}
-
-function toggleAudio() {
-    if (!oscillator || !gainNode) {
-        initializeAudio(); // Initialize on first interaction
-    }
-
+function startAudio() {
     if (audioContext.state === 'suspended') {
-        audioContext.resume();
+        audioContext.resume(); // Resume the audio context if it was suspended
     }
-
-    if (isAudioPlaying) {
-        gainNode.gain.value = 0;
-        isAudioPlaying = false;
-    } else {
-        isAudioPlaying = true;
-        gainNode.gain.value = 1; // Adjust according to your application needs
-    }
+    oscillator.start();
+    gainNode.gain.value = 1; // Ensure the audio is always playing
 }
-
 
 async function setupCamera() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         video.srcObject = stream;
         permissionNotice.style.display = 'none'; // Hide permission notice on success
+        startAudio(); // Start audio after user interaction with the camera
 
         return new Promise((resolve) => {
             video.onloadedmetadata = () => {
@@ -120,7 +95,7 @@ async function detectHands(model) {
                     const distance = calculateDistance(thumbTip, indexTip);
 
                     const maxVolume = 1;
-                    const maxDistance = 20;
+                    const maxDistance = 100;
                     gainNode.gain.value = Math.min(distance / maxDistance, 1) * maxVolume;
 
                     const handY = prediction.boundingBox.topLeft[1] + (prediction.boundingBox.bottomRight[1] - prediction.boundingBox.topLeft[1]) / 2;
