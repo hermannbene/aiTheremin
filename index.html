@@ -6,31 +6,23 @@
     <title>Hand Tracking Web App</title>
     <style>
         body {
-            position: relative;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
         }
 
-        #video, #canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            transform: scaleX(-1); /* Mirror the video and canvas for a more intuitive experience */
+        #video {
+            width: 640px;
+            height: 480px;
+            border: 2px solid black;
         }
     </style>
 </head>
 <body>
-    <h1>Real-Time Multi-Hand Tracking</h1>
-    <video id="video" autoplay playsinline width="640" height="480"></video>
-    <canvas id="canvas" width="640" height="480"></canvas>
-
-    <!-- TensorFlow.js Core and MediaPipe Hands library -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-
-    <!-- Your application's logic -->
+    <video id="video" autoplay playsinline></video>
     <script src="app.js"></script>
 </body>
 </html>

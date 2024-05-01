@@ -1,56 +1,74 @@
-const videoElement = document.getElementById('video');
-const canvasElement = document.getElementById('canvas');
-const canvasCtx = canvasElement.getContext('2d');
+// Get video element
+const video = document.getElementById('video');
 
-// MediaPipe Hands model
-const hands = new Hands({
-    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-});
-
-// Set model options
-hands.setOptions({
-    maxNumHands: 2,
-    modelComplexity: 1,
-    minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5
-});
-
-// Connect the camera to the model
-async function connectCamera() {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoElement.srcObject = stream;
-    videoElement.onloadedmetadata = () => {
-        videoElement.play();
-    };
+// Function to start the camera
+async function startCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+    } catch (error) {
+        console.error('Error accessing the camera:', error);
+    }
 }
 
-// Load and start the model
-hands.onResults(onResults);
+// Function to draw hand landmarks on the canvas
+function drawHandLandmarks(predictions) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
 
-async function main() {
-    await connectCamera();
-    const camera = new Camera(videoElement, {
-        onFrame: async () => {
-            await hands.send({ image: videoElement });
-        },
-        width: 1280,
-        height: 720
-    });
-    camera.start();
-}
+    // Set canvas size to match video dimensions
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
-// Handle the results from the MediaPipe Hands model
-function onResults(results) {
-    canvasCtx.save();
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-    if (results.multiHandLandmarks) {
-        for (const landmarks of results.multiHandLandmarks) {
-            drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 5 });
-            drawLandmarks(canvasCtx, landmarks, { color: '#FF0000', lineWidth: 2 });
+    // Draw hand landmarks
+    for (const hand of predictions) {
+        for (const landmark of hand.landmarks) {
+            const x = landmark[0] * canvas.width;
+            const y = landmark[1] * canvas.height;
+            context.beginPath();
+            context.arc(x, y, 5, 0, 2 * Math.PI);
+            context.fillStyle = 'red';
+            context.fill();
         }
     }
-    canvasCtx.restore();
+
+    // Draw the canvas on top of the video
+    video.parentElement.appendChild(canvas);
 }
 
-main();
+// Load the handpose model
+async function loadHandposeModel() {
+    try {
+        const model = await handpose.load();
+        return model;
+    } catch (error) {
+        console.error('Error loading handpose model:', error);
+    }
+}
+
+// Function to detect hands in the video stream
+async function detectHands(model) {
+    const predictions = await model.estimateHands(video);
+    if (predictions.length > 0) {
+        // Draw hand landmarks on the canvas
+        drawHandLandmarks(predictions);
+    }
+
+    // Request next frame
+    requestAnimationFrame(() => detectHands(model));
+}
+
+// Main function to start the camera and detect hands
+async function main() {
+    // Start the camera
+    await startCamera();
+
+    // Load the handpose model
+    const model = await loadHandposeModel();
+
+    // Detect hands in the video stream
+    detectHands(model);
+}
+
+// Run the main function when the page is loaded
+window.addEventListener('load', main);
