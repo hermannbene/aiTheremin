@@ -95,7 +95,7 @@ async function detectHands(model) {
                     const distance = calculateDistance(thumbTip, indexTip);
 
                     const maxVolume = 1;
-                    const maxDistance = 100;
+                    const maxDistance = 200;
                     gainNode.gain.value = Math.min(distance / maxDistance, 1) * maxVolume;
 
                     const handY = prediction.boundingBox.topLeft[1] + (prediction.boundingBox.bottomRight[1] - prediction.boundingBox.topLeft[1]) / 2;

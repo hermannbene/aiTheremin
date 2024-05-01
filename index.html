@@ -32,6 +32,13 @@
             border-radius: 10px;
         }
 
+        button {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 5px 10px;
+        }
 
         #permissionNotice {
             color: red;
@@ -49,6 +56,7 @@
 <body>
     <video id="video" width="640" height="480" autoplay muted></video>
     <canvas id="canvas" width="640" height="480"></canvas>
+    <button onclick="toggleAudio()">Toggle Audio</button>
     <div id="audioStatus">Audio is on. Frequency: <span id="frequencyDisplay">440</span> Hz, Volume: <span id="volumeDisplay">0</span>%</div>
     <div id="permissionNotice">Please enable camera and audio permissions in your browser settings.</div>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
