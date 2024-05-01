@@ -1,0 +1,1 @@
+C:\Users\Benedikt\ Hermann\Documents\aiTheremin\aiTheremin\wasm-hand-detection\target\wasm32-unknown-unknown\debug\wasm_hand_detection.wasm: C:\Users\Benedikt\ Hermann\Documents\aiTheremin\aiTheremin\wasm-hand-detection\src\lib.rs
