@@ -13,7 +13,7 @@ let isAudioPlaying = true; // To keep track of audio state
 
 oscillator.type = 'sine'; // Type of wave
 oscillator.frequency.value = 440; // Starting frequency
-gainNode.gain.value = 0; // Start with the volume at 0
+gainNode.gain.value = 0.5; // Start with the volume at 0
 
 oscillator.connect(gainNode);
 gainNode.connect(audioContext.destination);
@@ -88,7 +88,7 @@ async function detectHands(model) {
                     const distance = calculateDistance(thumbTip, indexTip);
 
                     const maxVolume = 1;
-                    const maxDistance = 200;
+                    const maxDistance = 20;
                     gainNode.gain.value = Math.min(distance / maxDistance, 1) * maxVolume;
 
                     const handY = prediction.boundingBox.topLeft[1] + (prediction.boundingBox.bottomRight[1] - prediction.boundingBox.topLeft[1]) / 2;
