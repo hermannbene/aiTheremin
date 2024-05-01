@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hand Detection Web App</title>
+    <title>Simple Camera Access</title>
 </head>
 <body>
-    <video id="video" playsinline autoplay></video>
-    <button id="stopButton">Stop Camera</button>
-    <button id="toggleButton">Toggle Camera</button>
+    <h1>Camera Stream Example</h1>
+    <video id="video" autoplay playsinline></video>
+    <div>
+        <button onclick="startCamera()">Start Camera</button>
+        <button onclick="stopCamera()">Stop Camera</button>
+        <button onclick="toggleCamera()">Toggle Camera</button>
+    </div>
 
-    <!-- Include JavaScript files -->
-    <script type="module" src="js/camera.js"></script>
-    <script type="module" src="js/handDetection.js"></script>
-    <script type="module" src="js/app.js"></script>
+    <script src="camera.js"></script>
 </body>
 </html>
