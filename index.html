@@ -4,18 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hand Detection Web App</title>
-    <link rel="stylesheet" href="css/styles.css"> <!-- Link to your CSS for styling -->
 </head>
 <body>
-    <h1>Hand Detection Application</h1>
-    <video id="video" playsinline autoplay></video> <!-- Video element for displaying camera feed -->
-    <div>
-        <button id="stopButton">Stop Camera</button>
-        <button id="toggleButton">Toggle Camera</button>
-    </div>
+    <video id="video" playsinline autoplay></video>
+    <button id="stopButton">Stop Camera</button>
+    <button id="toggleButton">Toggle Camera</button>
 
-    <!-- Scripts -->
-    <script type="module" src="js/app.js"></script> <!-- Make sure to use type="module" for ES6 modules -->
-    <!-- Include additional scripts if necessary -->
+    <!-- Include JavaScript files -->
+    <script type="module" src="js/camera.js"></script>
+    <script type="module" src="js/handDetection.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>
