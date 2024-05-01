@@ -6,52 +6,57 @@
     <title>Hand Detection and Sound Control</title>
     <style>
         body {
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
             height: 100vh;
-            margin: 0;
+            background-color: #000; /* Optional: Sets background color to black */
         }
 
-        canvas, video {
+        video, canvas {
+            width: 100vw; /* Sets the width to 100% of the viewport width */
+            height: auto; /* Scales height automatically to maintain the aspect ratio */
             position: absolute;
-            top: 0;
-            left: 0%;
-            transform: translateX(100%);
-        }
-
-        #audioStatus {
-            position: absolute;
-            bottom: 20px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -50%);
+        }
+
+        #audioStatus, #permissionNotice, button {
+            position: absolute;
+            z-index: 10; /* Ensures UI elements are above the video/canvas layers */
             color: white;
             background: rgba(0, 0, 0, 0.5);
             padding: 10px;
-            border-radius: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        #audioStatus {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         #permissionNotice {
-            color: red;
-            position: absolute;
-            top: 60px;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            background: yellow;
-            padding: 5px;
-            border-radius: 5px;
-            display: none;
         }
+
+
     </style>
+
 </head>
 <body>
-    <video id="video" width="640" height="480" autoplay muted></video>
-    <canvas id="canvas" width="640" height="480"></canvas>
+    <video id="video" autoplay muted></video>
+    <canvas id="canvas"></canvas>
     <div id="audioStatus">Audio is on. Frequency: <span id="frequencyDisplay">440</span> Hz, Volume: <span id="volumeDisplay">0</span>%</div>
     <div id="permissionNotice">Please enable camera and audio permissions in your browser settings.</div>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
     <script src="app.js"></script>
 </body>
+
 </html>

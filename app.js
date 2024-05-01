@@ -12,17 +12,17 @@ let gainNode = audioContext.createGain();
 
 oscillator.type = 'sine';
 oscillator.frequency.value = 440;  // Initial frequency in hertz
-gainNode.gain.value = 0;  // Start with mute to prevent autoplay issues
+gainNode.gain.value = 0;  // Initially muted to prevent autoplay issues
 
 oscillator.connect(gainNode);
 gainNode.connect(audioContext.destination);
+oscillator.start();
 
 function startAudio() {
     if (audioContext.state === 'suspended') {
         audioContext.resume(); // Resume the audio context if it was suspended
     }
-    oscillator.start();
-    gainNode.gain.value = 1; // Ensure the audio is always playing
+    gainNode.gain.value = 1; // Set volume to normal
 }
 
 async function setupCamera() {
@@ -30,10 +30,15 @@ async function setupCamera() {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         video.srcObject = stream;
         permissionNotice.style.display = 'none'; // Hide permission notice on success
-        startAudio(); // Start audio after user interaction with the camera
+
+        video.onloadedmetadata = () => {
+            adjustCanvas();
+            startAudio(); // Start audio after user interaction with the camera
+        };
 
         return new Promise((resolve) => {
             video.onloadedmetadata = () => {
+                adjustCanvas();
                 resolve(video);
             };
         });
@@ -43,6 +48,15 @@ async function setupCamera() {
         permissionNotice.style.display = 'block'; // Show permission notice on failure
     }
 }
+
+function adjustCanvas() {
+    canvas.width = video.clientWidth;
+    canvas.height = video.clientHeight;
+    canvas.style.width = '100vw';  // Match the viewport width
+    canvas.style.height = 'auto';  // Auto-adjust the height to maintain aspect ratio
+}
+
+window.addEventListener('resize', adjustCanvas); // Adjust canvas size on window resize
 
 async function loadModel() {
     return await handpose.load();
@@ -95,7 +109,7 @@ async function detectHands(model) {
                     const distance = calculateDistance(thumbTip, indexTip);
 
                     const maxVolume = 1;
-                    const maxDistance = 100;
+                    const maxDistance = 200;
                     gainNode.gain.value = Math.min(distance / maxDistance, 1) * maxVolume;
 
                     const handY = prediction.boundingBox.topLeft[1] + (prediction.boundingBox.bottomRight[1] - prediction.boundingBox.topLeft[1]) / 2;
